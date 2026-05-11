@@ -36,6 +36,10 @@ jobs:
           # 2008-i915-4-lane-quirk-for-mbp15-1.patch presente a quell'hash.
           # Usando HEAD i patch sono già nella versione corrente/corretta.
 
+          # Il patch 2008-i915-4-lane-quirk-for-mbp15-1.patch non si applica più perché il file intel_quirks.h nel kernel 6.17.13 è cambiato rispetto a quando è stato scritto il patch.
+          # Patch rimosso
+          rm linux-t2-patches/2008-i915-4-lane-quirk-for-mbp15-1.patch
+
           echo "APT::Get::Assume-Yes \"true\";" > ./90forceyes
 
           apt list --installed | cut -d "/" -f 1 | grep python | xargs > ./python-pkg
