@@ -96,7 +96,7 @@ jobs:
         uses: softprops/action-gh-release@v3
         with:
           files: ${{ github.workspace }}/pve-kernel/*.deb
-          tag_name: v6.17.13-1-t2-1   # <-- aggiorna qui ad ogni build
+          tag_name: v6.17.13-7-t2-1   # <-- aggiorna qui ad ogni build
           body: |
             Kernel PVE con patch T2 per Mac con chip T2.
 
