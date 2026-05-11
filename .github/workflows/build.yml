@@ -40,6 +40,11 @@ jobs:
           # Patch rimosso
           rm linux-t2-patches/2008-i915-4-lane-quirk-for-mbp15-1.patch
 
+          cd pve-kernel
+          # update ABI file for 6.17.13-7-pve (amd64)
+          git checkout bb695b7df29a1cfa6381b30d3122ab84ca1959e0
+          cd -
+
           echo "APT::Get::Assume-Yes \"true\";" > ./90forceyes
 
           apt list --installed | cut -d "/" -f 1 | grep python | xargs > ./python-pkg
