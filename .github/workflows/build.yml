@@ -98,7 +98,7 @@ jobs:
                 gcc git kmod libdw-dev libelf-dev libiberty-dev libnuma-dev libslang2-dev libssl-dev libtool lintian lz4 dwarves libpve-common-perl python3-dev zstd \
                 perl-modules rsync sed sphinx-common tar xmlto zlib1g-dev gawk \
                 bindgen rustc rust-src rustfmt rust-clippy && \
-              git config --global --add safe.directory /repo/pve-kernel && \
+              git config --global --add safe.directory "*" && \
               cd pve-kernel && \
               cp ../linux-t2-patches/*patch ./patches/kernel && \
               cp ../T2.patch ./ && \
