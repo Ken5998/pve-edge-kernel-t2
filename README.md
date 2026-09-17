@@ -32,6 +32,24 @@ the corresponding T2 release does not exist yet, it builds the Debian packages
 and publishes them in [Releases](https://github.com/Ken5998/pve-edge-kernel-t2/releases).
 The workflow can also be started manually from the Actions page.
 
+## APT repository
+The signed APT repository automatically tracks the latest successfully built T2
+kernel and headers through the `proxmox-kernel-t2` metapackage.
+
+```bash
+install -d -m 0755 /etc/apt/keyrings
+curl -fsSL https://apt.ksmvc.ch/ksmvc-archive-keyring.gpg \
+  -o /etc/apt/keyrings/ksmvc-archive-keyring.gpg
+curl -fsSL https://apt.ksmvc.ch/ksmvc-t2.sources \
+  -o /etc/apt/sources.list.d/ksmvc-t2.sources
+apt update
+apt install proxmox-kernel-t2
+```
+
+Future kernels and headers can then be installed with `apt full-upgrade`.
+The repository signing-key fingerprint is
+`6127 B3F9 ADD5 1419 7905 2C93 2313 B094 2151 808C`.
+
 #### Prerequisites
 Make sure you have at least 10 GB of free space available and have the following
 packages installed:

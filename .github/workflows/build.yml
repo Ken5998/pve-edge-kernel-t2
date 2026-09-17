@@ -54,6 +54,28 @@ jobs:
           echo "pve_commit=$(git -C pve-kernel rev-parse HEAD)" >> "${GITHUB_OUTPUT}"
           echo "t2_commit=$(git -C linux-t2-patches rev-parse HEAD)" >> "${GITHUB_OUTPUT}"
 
+      - name: Verify APT publishing credentials
+        if: ${{ steps.prepare.outputs.should_build == 'true' }}
+        env:
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          APT_GPG_PRIVATE_KEY: ${{ secrets.APT_GPG_PRIVATE_KEY }}
+          APT_GPG_PASSPHRASE: ${{ secrets.APT_GPG_PASSPHRASE }}
+        run: |
+          set -euo pipefail
+          for required_variable in \
+            R2_ACCOUNT_ID \
+            AWS_ACCESS_KEY_ID \
+            AWS_SECRET_ACCESS_KEY \
+            APT_GPG_PRIVATE_KEY \
+            APT_GPG_PASSPHRASE; do
+            test -n "${!required_variable}"
+          done
+          AWS_DEFAULT_REGION=auto aws s3 ls \
+            s3://pve-t2-apt \
+            --endpoint-url "https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com"
+
       - name: Free up disk space for the CI
         if: ${{ steps.prepare.outputs.should_build == 'true' }}
         uses: Ken5998/remove-unwanted-software@v1
@@ -142,3 +164,18 @@ jobs:
           draft: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish APT repository
+        if: ${{ steps.prepare.outputs.should_build == 'true' }}
+        env:
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_BUCKET_NAME: pve-t2-apt
+          APT_GPG_PRIVATE_KEY: ${{ secrets.APT_GPG_PRIVATE_KEY }}
+          APT_GPG_PASSPHRASE: ${{ secrets.APT_GPG_PASSPHRASE }}
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes apt-utils gnupg
+          aws --version
+          bash ./scripts/publish-apt-repository.sh "${{ github.workspace }}/pve-kernel"
