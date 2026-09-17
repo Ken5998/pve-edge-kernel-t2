@@ -26,6 +26,12 @@ apt install ./pve-kernel-VERSION_amd64.deb
 ## Building manually
 You may also choose to manually build one of these kernels yourself. Refer to the [CI](https://github.com/Ken5998/pve-edge-kernel-t2/blob/master/.github/workflows/build.yml) for help.
 
+## Automated builds
+GitHub Actions checks the current Proxmox kernel every Monday at 03:17 UTC. If
+the corresponding T2 release does not exist yet, it builds the Debian packages
+and publishes them in [Releases](https://github.com/Ken5998/pve-edge-kernel-t2/releases).
+The workflow can also be started manually from the Actions page.
+
 #### Prerequisites
 Make sure you have at least 10 GB of free space available and have the following
 packages installed:
