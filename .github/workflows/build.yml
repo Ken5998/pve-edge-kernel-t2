@@ -30,7 +30,12 @@ jobs:
         run: |
           set -euo pipefail
 
-          git clone --depth 1 https://github.com/t2linux/linux-t2-patches.git
+          # Keep the T2 patches compatible with the current Proxmox kernel.
+          t2_patches_commit=fea007484b84b28acc3fd55e018345db3685ac08
+          git init linux-t2-patches
+          git -C linux-t2-patches remote add origin https://github.com/t2linux/linux-t2-patches.git
+          git -C linux-t2-patches fetch --depth 1 origin "${t2_patches_commit}"
+          git -C linux-t2-patches checkout --detach FETCH_HEAD
           rm -f linux-t2-patches/2008-i915-4-lane-quirk-for-mbp15-1.patch
 
           git clone --depth 1 git://git.proxmox.com/git/pve-kernel.git
