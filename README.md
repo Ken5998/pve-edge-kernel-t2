@@ -15,26 +15,16 @@ Many people need control of fans for Proxmox, so I am linking the fan guide [her
 I accept donations via [GitHub Sponsors](https://github.com/sponsors/Ken5998). If you wanna appreciate my work by donating, you can donate me via the methods above. **Your donations shall keep me motivated to maintain this repository.**
 
 ## Installation
-Select the kernel required from the [Releases](https://github.com/Ken5998/pve-edge-kernel-t2/releases)
-page you want to install and download the appropriate Debian packages.
-Then, you can install the packages as follows:
 
-```sh
-apt install ./pve-kernel-VERSION_amd64.deb
-```
+These packages target Proxmox VE 9 on T2 Macs. Run the installation commands as
+root on your Proxmox host. Choose either the APT repository for ongoing updates
+or a manual download to install a specific release.
 
-## Building manually
-You may also choose to manually build one of these kernels yourself. Refer to the [CI](https://github.com/Ken5998/pve-edge-kernel-t2/blob/master/.github/workflows/build.yml) for help.
+### APT repository
 
-## Automated builds
-GitHub Actions checks the current Proxmox kernel every Monday at 03:17 UTC. If
-the corresponding T2 release does not exist yet, it builds the Debian packages
-and publishes them in [Releases](https://github.com/Ken5998/pve-edge-kernel-t2/releases).
-The workflow can also be started manually from the Actions page.
-
-## APT repository
 The signed APT repository automatically tracks the latest successfully built T2
 kernel and headers through the `proxmox-kernel-t2` metapackage.
+The setup commands require `curl` to be installed.
 
 ```bash
 install -d -m 0755 /etc/apt/keyrings
@@ -50,22 +40,65 @@ Future kernels and headers can then be installed with `apt full-upgrade`.
 The repository signing-key fingerprint is
 `6127 B3F9 ADD5 1419 7905 2C93 2313 B094 2151 808C`.
 
-#### Prerequisites
-Make sure you have at least 10 GB of free space available and have the following
-packages installed:
+### Manual package installation
+
+Download the T2 kernel and matching headers from the
+[Releases](https://github.com/Ken5998/pve-edge-kernel-t2/releases) page into an
+otherwise empty directory. From that directory, install them with:
 
 ```bash
-apt install devscripts debhelper equivs git
+apt install ./proxmox-kernel-*-pve-t2_*_amd64.deb ./proxmox-headers-*-pve-t2_*_amd64.deb
 ```
+
+Manual installation does not configure the APT repository or install its
+`proxmox-kernel-t2` metapackage. To receive future T2 releases through APT,
+follow the repository setup above.
 
 ## Removal
-Use `apt` to remove individual kernel packages from your system. If you want
-to remove all packages from a particular kernel release, use the following
-command:
+
+Boot into a kernel you intend to keep before removing an older one. Check the
+running kernel with `uname -r`, then use `apt` to remove the specific kernel and
+headers packages. Replace `KERNEL_RELEASE` with the full release identifier
+(for example, `7.0.14-20-pve-t2`):
 
 ```bash
-apt remove pve-kernel-6.5*t2 pve-headers-6.5*t2
+apt remove proxmox-kernel-KERNEL_RELEASE proxmox-headers-KERNEL_RELEASE
 ```
+
+If you installed `proxmox-kernel-t2`, it depends on the kernel and headers it
+tracks. Removing those packages also requires removing the metapackage, which
+stops it from pulling in future T2 releases.
+
+## Building
+
+### Building manually
+
+To compile the kernel yourself, follow the source preparation and build steps
+in the [CI workflow](.github/workflows/build.yml).
+
+#### Prerequisites
+
+The current workflow uses a Linux host with Docker and builds inside a
+`debian:trixie` container. You also need Git to fetch the sources and enough disk
+space for the kernel sources, build output and Debian packages. The workflow's
+`Build Kernel` step installs the build dependencies inside the container;
+refer to it for the complete package list and Proxmox repository setup.
+
+Use the same pinned T2 patch revision and patch preparation steps as the
+workflow. Newer upstream patches may not apply to the current Proxmox kernel.
+
+### Automated builds
+
+GitHub Actions is scheduled to check the current Proxmox kernel every Monday
+at 03:17 UTC. If the corresponding T2 release tag already exists, the scheduled
+run skips the build. Otherwise, it builds the Debian packages, publishes them
+in [Releases](https://github.com/Ken5998/pve-edge-kernel-t2/releases) and updates
+the signed APT repository.
+
+The workflow also runs on pushes unless the commit message contains `skip ci`,
+and can be started manually from the
+[Actions page](https://github.com/Ken5998/pve-edge-kernel-t2/actions/workflows/build.yml).
+Push and manual runs do not use the scheduled release-exists check.
 
 ## Credits
 Following are the people/groups that made this fork possible and the links to contribute to them:
